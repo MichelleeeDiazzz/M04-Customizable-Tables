@@ -1,0 +1,131 @@
+---
+title: "M04-Visualizing Data with Tables for MSDM CEP"
+author: "Michelle Diaz"
+date: '`r format(Sys.time())`'
+format: 
+  html: 
+    toc: true
+    number-sections: true
+    code-link: true
+    embed-resources: true
+editor: visual
+execute: 
+  freeze: auto
+---
+
+# Reflection on Visualizing Data with Tables
+
+## What I Learned From the Videos
+
+> Summarize what you learned from the videos you watched.
+
+From the videos, I learned that `gt` is an R package that gives users the ability to make tables look clear, concise, and visually appealing while remaining easy to read. The name `gt` stands for "grammar of tables," referring to the different elements of a table that you can customize. I learned that there are many ways to turn raw data into a polished table, including adding a title and subtitle with `tab_header()`, aligning the header with `opt_align_table_header()`, creating a table stub with `rowname_col()`, customizing column labels with `cols_label()`, formatting numbers with `fmt_number()`, adjusting column widths with `cols_width()`, adding source notes with `tab_source_note()` and footnotes with `tab_footnote()`, styling cells with `tab_style()`, labeling the stubhead with `tab_stubhead()`, changing fonts with `opt_table_font()`, and automatically scaling cell color based on value with `data_color()`. I also learned that `gtExtras` is an extension of the `gt` package that adds more features and saves time. Overall, gt tables are accessible, easily modifiable, and reproducible.
+
+## What I Liked About gt and gtExtras
+
+> What did you like about the gt and gtExtras packages demonstrated in the videos?
+
+I liked that `gtExtras` gives you the ability to add icons to a table, which helps explain the data more clearly at a glance. With `gt`, I liked the ability to assign color to specific values, such as the example in the video where you can color only the negative values, which makes important information stand out immediately. I also appreciated how much these packages let you combine textual data with small plots in a single table, making the information both readable and visually engaging.
+
+## How Tables Complement Charts
+
+> How do tables complement charts for data visualization?
+
+Tables complement charts because the two serve different purposes. Charts are better for big-picture visualization, showing trends, patterns, and overall shape at a glance. Tables, on the other hand, are great for showcasing specific numerical values across multiple categories or sections, giving the reader the exact figures. Used together, they provide both the broad visual story and the precise underlying detail.
+
+## When I Would Prefer Tables Over Charts
+
+> Under what circumstances would you prefer to use tables rather than charts to visualize data?
+
+I would prefer to use a table rather than a chart when I need to showcase specific numerical values across multiple categories or sections, especially when the exact numbers matter more than the overall visual pattern. Tables are ideal when precision is important, such as comparing detailed figures side by side, or when a reader needs to look up a specific value rather than just grasp a general trend.
+
+# Building a Table With gt and gtExtras
+
+## Setup
+
+```{r}
+#| label: setup
+
+# Run once if needed (commented so the document renders):
+# install.packages("gt")
+# install.packages("gtExtras")
+
+library(tidyverse)
+library(gt)
+library(gtExtras)
+```
+
+## Load the Data
+
+<!-- NOTE: Using the built-in "pizzaplace" dataset from the gt package as a placeholder since CEP data collection is still in progress. Swap this section out for actual CEP data once available, keeping the same wrangling and gt structure below. -->
+
+```{r}
+#| label: data
+
+data(pizzaplace)
+glimpse(pizzaplace)
+```
+
+## Wrangle: Summarize by Pizza Type
+
+Before piping into `gt`, the data is summarized by pizza type (classic, chicken, supreme, veggie).
+
+```{r}
+#| label: wrangle
+
+type_summary <- pizzaplace |>
+  group_by(type) |>
+  summarise(
+    n_orders = n(),
+    avg_price = mean(price, na.rm = TRUE),
+    total_revenue = sum(price, na.rm = TRUE)
+  ) |>
+  arrange(desc(total_revenue))
+
+type_summary
+```
+
+## The Final Table
+
+```{r}
+#| label: gt-table
+
+type_summary |>
+  gt(rowname_col = "type") |>
+  tab_header(
+    title = "Pizza Sales Summary by Type",
+    subtitle = "Orders, average price, and total revenue across pizza categories"
+  ) |>
+  cols_label(
+    n_orders = "Orders",
+    avg_price = "Avg. Price",
+    total_revenue = "Total Revenue"
+  ) |>
+  fmt_currency(columns = c(avg_price, total_revenue), decimals = 2) |>
+  fmt_number(columns = n_orders, decimals = 0) |>
+  tab_spanner(
+    label = "Sales Metrics",
+    columns = c(avg_price, total_revenue)
+  ) |>
+  tab_stubhead(label = "Pizza Type") |>
+  tab_source_note(
+    source_note = "Source: pizzaplace dataset (built-in to the gt package)."
+  ) |>
+  tab_footnote(
+    footnote = "Total revenue reflects the sum of all recorded order prices for each pizza type.",
+    locations = cells_column_labels(columns = total_revenue)
+  ) |>
+  data_color(columns = total_revenue, palette = c("white", "#005030")) |>
+  gt_theme_538()
+```
+
+# Why This Table Is Worth Adding to My MSDM Project
+
+> Explain why the table is worth adding to your MSDM project written report or presentation slides.
+
+Adding a table like this to an MSDM project is very useful because it clearly displays the data in a format that is readable and digestible. Rather than only using a graph, a well-designed table breaks the data down and presents it in a clean, organized way that makes the numbers easy to interpret at a glance. It is also a valuable skill to develop because it makes working with data seamless, since everything happens in one application instead of having to transfer the data into another program like Excel, Canva, or Google Sheets to build a table. On top of saving time, it keeps the work reproducible and adds a layer of professionalism to coursework and to any client-facing report or presentation.
+
+# Appendix: Publication Links
+
+- [GitHub Repository](https://github.com/MichelleeeDiazzz/REPOSITORY-NAME)
+- [Published M05 Table Visualization Report](https://michelleeediazzz.github.io/REPOSITORY-NAME/M05-Table-Viz.html)
